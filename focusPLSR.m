@@ -4,44 +4,117 @@ import bioma.data.*;
 data = DataMatrix('File', 'sigs-for-MC.xls');
 
 
-IDX = 1:16;
-
-data = [data(IDX,1:3:end); data(IDX,2:3:end); data(IDX,3:3:end)];
-
-data(:,:) = zscore(double(data));
-    
-%sigs = (data(1:16,2:10));
-
-jackMDS (data)
 
 
-%plot(XL(:,1),XL(:,2),'o');
+IDX = [1 8:14];
+
+data2 = [data(IDX,1:3:end); data(IDX,2:3:end); data(IDX,3:3:end)];
+stat = jackPCA (data2);
+
+subplot(4,2,1);
+ploterr(stat.c1m,stat.c2m,stat.c1e,stat.c2e,'ro')
+axis([-1 1 -1 1]);
+axis square;
+text(stat.c1m,stat.c2m,stat.ggnames);
+xlabel('PC 1');
+ylabel('PC 2');
+subplot(4,2,2);
 %hold on;
-%plot(XS(:,1),XS(:,2),'go');
+ploterr(stat.s1m,stat.s2m,stat.s1e,stat.s2e,'bo')
+axis([-5 5 -4 4]);
+axis square;
+text(stat.s1m,stat.s2m,stat.stimuliS);
+xlabel('PC 1');
+ylabel('PC 2');
+title('SKBR3');
 
 
 
-% for ii = 1:16
-%     text(YS(ii,1),YS(ii,2),data.rownames{ii});
-% end
-
-%plot(YL(1),YL(2),'ro');
-%axis([-3 3 -3 3]);
 
 
 
 
-% ploterr(XL(:,1),XL(:,2),XLjk(:,1),XLjk(:,2),'o')
-% hold on;
-% for ii = 1:9
-%     text(XL(ii,1),XL(ii,2),data.colnames{ii+1});
-% end
 
 
-% sigs = double(data(25:(25+7),2:end));
-% [R,P,RLO,RUP] = corrcoef(sigs);
-% 
-% R = R(10,1:9);
-% RLO = RLO(10,1:9);
-% RUP = RUP(10,1:9);
-% P = P(10,1:9);
+
+
+
+
+
+
+
+IDX = [15 22:28];
+
+data2 = [data(IDX,1:3:end); data(IDX,2:3:end); data(IDX,3:3:end)];
+stat = jackPCA (data2);
+
+subplot(4,2,3);
+ploterr(stat.c1m,stat.c2m,stat.c1e,stat.c2e,'ro')
+axis([-1 1 -1 1]);
+axis square;
+text(stat.c1m,stat.c2m,stat.ggnames);
+xlabel('PC 1');
+ylabel('PC 2');
+subplot(4,2,4);
+%hold on;
+ploterr(stat.s1m,stat.s2m,stat.s1e,stat.s2e,'bo')
+axis([-5 5 -4 4]);
+axis square;
+text(stat.s1m,stat.s2m,stat.stimuliS);
+xlabel('PC 1');
+ylabel('PC 2');
+title('BT474');
+
+
+
+
+IDX = [29 36:42];
+
+data2 = [data(IDX,1:3:end); data(IDX,2:3:end); data(IDX,3:3:end)];
+stat = jackPCA (data2);
+
+subplot(4,2,5);
+ploterr(stat.c1m,stat.c2m,stat.c1e,stat.c2e,'ro')
+axis([-1 1 -1 1]);
+axis square;
+text(stat.c1m,stat.c2m,stat.ggnames);
+xlabel('PC 1');
+ylabel('PC 2');
+subplot(4,2,6);
+%hold on;
+ploterr(stat.s1m,stat.s2m,stat.s1e,stat.s2e,'bo')
+axis([-5 5 -4 4]);
+axis square;
+text(stat.s1m,stat.s2m,stat.stimuliS);
+xlabel('PC 1');
+ylabel('PC 2');
+title('P');
+
+
+
+
+
+
+
+IDX = [43 49:54];
+
+data2 = [data(IDX,1:3:end); data(IDX,2:3:end); data(IDX,3:3:end)];
+stat = jackPCA (data2);
+
+subplot(4,2,7);
+ploterr(stat.c1m,stat.c2m,stat.c1e,stat.c2e,'ro')
+axis([-1 1 -1 1]);
+axis square;
+text(stat.c1m,stat.c2m,stat.ggnames);
+xlabel('PC 1');
+ylabel('PC 2');
+subplot(4,2,8);
+hold on;
+ploterr(stat.s1m,stat.s2m,stat.s1e,stat.s2e,'bo')
+axis([-5 5 -4 4]);
+axis square;
+text(stat.s1m,stat.s2m,stat.stimuliS);
+xlabel('PC 1');
+ylabel('PC 2');
+title('HCC');
+

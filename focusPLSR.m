@@ -6,115 +6,76 @@ data = DataMatrix('File', 'sigs-for-MC.xls');
 
 
 
-IDX = [1 8:14];
+IDX = 1:16;
 
 data2 = [data(IDX,1:3:end); data(IDX,2:3:end); data(IDX,3:3:end)];
 stat = jackPCA (data2);
 
-subplot(4,2,1);
-ploterr(stat.c1m,stat.c2m,stat.c1e,stat.c2e,'ro')
+subplot(1,4,1);
+
 axis([-1 1 -1 1]);
 axis square;
 text(stat.c1m,stat.c2m,stat.ggnames);
-xlabel('PC 1');
-ylabel('PC 2');
-subplot(4,2,2);
-%hold on;
-ploterr(stat.s1m,stat.s2m,stat.s1e,stat.s2e,'bo')
+
+hold on;
+for ii = 1:length(stat.c1m)
+    circle(stat.c1m(ii), stat.c2m(ii), stat.c1e(ii), stat.c2e(ii));
+end
+
+
+
+xlabel(['Principal Component 1 (' num2str(stat.exp(1),3) '%)']);
+ylabel(['Principal Component 2 (' num2str(stat.exp(2),3) '%)']);
+subplot(1,4,2);
+hold on;
+
+
+for ii = 1:length(stat.s1m)
+    circle(stat.s1m(ii), stat.s2m(ii), stat.s1e(ii), stat.s2e(ii));
+end
+
+
 axis([-5 5 -4 4]);
 axis square;
 text(stat.s1m,stat.s2m,stat.stimuliS);
-xlabel('PC 1');
-ylabel('PC 2');
+xlabel(['Principal Component 1 (' num2str(stat.exp(1),3) '%)']);
+ylabel(['Principal Component 2 (' num2str(stat.exp(2),3) '%)']);
 title('SKBR3');
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-IDX = [15 22:28];
+IDX = 17:32;
 
 data2 = [data(IDX,1:3:end); data(IDX,2:3:end); data(IDX,3:3:end)];
 stat = jackPCA (data2);
 
-subplot(4,2,3);
-ploterr(stat.c1m,stat.c2m,stat.c1e,stat.c2e,'ro')
+subplot(1,4,3);
 axis([-1 1 -1 1]);
 axis square;
 text(stat.c1m,stat.c2m,stat.ggnames);
-xlabel('PC 1');
-ylabel('PC 2');
-subplot(4,2,4);
-%hold on;
-ploterr(stat.s1m,stat.s2m,stat.s1e,stat.s2e,'bo')
-axis([-5 5 -4 4]);
-axis square;
-text(stat.s1m,stat.s2m,stat.stimuliS);
-xlabel('PC 1');
-ylabel('PC 2');
-title('BT474');
-
-
-
-
-IDX = [29 36:42];
-
-data2 = [data(IDX,1:3:end); data(IDX,2:3:end); data(IDX,3:3:end)];
-stat = jackPCA (data2);
-
-subplot(4,2,5);
-ploterr(stat.c1m,stat.c2m,stat.c1e,stat.c2e,'ro')
-axis([-1 1 -1 1]);
-axis square;
-text(stat.c1m,stat.c2m,stat.ggnames);
-xlabel('PC 1');
-ylabel('PC 2');
-subplot(4,2,6);
-%hold on;
-ploterr(stat.s1m,stat.s2m,stat.s1e,stat.s2e,'bo')
-axis([-5 5 -4 4]);
-axis square;
-text(stat.s1m,stat.s2m,stat.stimuliS);
-xlabel('PC 1');
-ylabel('PC 2');
-title('P');
-
-
-
-
-
-
-
-IDX = [43 49:54];
-
-data2 = [data(IDX,1:3:end); data(IDX,2:3:end); data(IDX,3:3:end)];
-stat = jackPCA (data2);
-
-subplot(4,2,7);
-ploterr(stat.c1m,stat.c2m,stat.c1e,stat.c2e,'ro')
-axis([-1 1 -1 1]);
-axis square;
-text(stat.c1m,stat.c2m,stat.ggnames);
-xlabel('PC 1');
-ylabel('PC 2');
-subplot(4,2,8);
 hold on;
-ploterr(stat.s1m,stat.s2m,stat.s1e,stat.s2e,'bo')
+for ii = 1:length(stat.c1m)
+    circle(stat.c1m(ii), stat.c2m(ii), stat.c1e(ii), stat.c2e(ii));
+end
+xlabel(['Principal Component 1 (' num2str(stat.exp(1),3) '%)']);
+ylabel(['Principal Component 2 (' num2str(stat.exp(2),3) '%)']);
+subplot(1,4,4);
+hold on;
+
+for ii = 1:length(stat.s1m)
+    circle(stat.s1m(ii), stat.s2m(ii), stat.s1e(ii), stat.s2e(ii));
+end
+
+
+hold on;
 axis([-5 5 -4 4]);
 axis square;
 text(stat.s1m,stat.s2m,stat.stimuliS);
-xlabel('PC 1');
-ylabel('PC 2');
-title('HCC');
+xlabel(['Principal Component 1 (' num2str(stat.exp(1),3) '%)']);
+ylabel(['Principal Component 2 (' num2str(stat.exp(2),3) '%)']);
+title('PC9');
+
+
 

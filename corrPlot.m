@@ -32,3 +32,17 @@ for cellLine = 1:4
 end
 
 
+%%
+
+
+for cellLine = 1:4
+    IDX = data(:,1) == cellLine;
+    X = double(data(IDX,2:end));
+    
+    
+    
+    
+    R1 = corrcoef(X(1:(size(X,1)/2),:));
+    
+    R2 = corrcoef(X((size(X,1)/2+1):end,:));
+end

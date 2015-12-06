@@ -1,5 +1,7 @@
 function [Btot, Bvar, pp, Ypred, pVarExp] = eNetJack(X,Y)
 
+parfor_progress(size(X,1));
+
 parfor ii = 1:size(X,1)
     ii
     
@@ -10,7 +12,11 @@ parfor ii = 1:size(X,1)
     Y2(ii) = [];
     
     Bvar(:,ii) = eNetOne(X2,Y2);
+    
+    parfor_progress;
 end
+
+parfor_progress(0);
 
 for jj = 1:size(Bvar,1)
     pp(jj) = signtest(Bvar(jj,:));
@@ -24,10 +30,7 @@ pVarExp = (1 - var(zscore(Ypred) - zscore(Y'))) / var(zscore(Y));
 
 end
 
-
 function outter = eNetOne(X,Y)
-
-[B, FitInfo] = lasso(X,Y,'CV',13);
-outter = B(:,FitInfo.Index1SE);
-
+    [B, FitInfo] = lasso(X,Y,'CV',13);
+    outter = B(:,FitInfo.IndexMinMSE);
 end

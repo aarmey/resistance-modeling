@@ -1,142 +1,216 @@
-clc; clear;
 
-import bioma.data.*;
-
-data = DataMatrix('File', 'fullResistanceSet.xls');
-
-for cellLine = 1:4
-    IDX = data(:,1) == cellLine;
+function eNetRegression
+    init;
     
-    data(IDX,end) = (double(data(IDX,end)));
+    genIndivData;
+    
+    plotIndivData;
 end
 
-cLine = double(data(:,1));
-data(:,1) = [];
+function init()
+    global data labb cLine names;
 
-labb = {'Offset','Akt','Erk','GSK','cJun','JNK','P38','Akt-Erk','Akt-GSK',...
-    'Akt-cJun','Akt-JNK','Akt-P38','Erk-GSK','Erk-cJun','Erk-JNK','Erk-P38',...
-    'GSK-cJun','GSK-JNK','GSK-P38','cJun-JNK','cJun-P38','JNK-P38'};
+    import bioma.data.*;
 
+    data = DataMatrix('File', 'fullResistanceSet.xls');
 
+    for cellLine = 1:4
+        IDX = data(:,1) == cellLine;
 
+        data(IDX,end) = (double(data(IDX,end)));
+    end
 
+    cLine = double(data(:,1));
+    data(:,1) = [];
 
-%% Model including all cell lines
-
-X = x2fx(double(data(:,1:(end-1))),'interactions');
-Y = double(data(:,end));
-
-% [B, FitInfo] = lasso(X,zscore(Y),'CV',26,'Options',statset('UseParallel',true));
-% lassoPlot(B, FitInfo);
-
-
- [Btot, bVarTot, ppTot, Ypred, pVarExp] = eNetJack(X,Y);
-
-%%
-
-IDX = ppTot < 0.05;
-errorbar(Btot(IDX),bVarTot(IDX),'.');
-text(1:sum(IDX),Btot(IDX),labb(IDX));
-line([0 sum(IDX)+1],[0 0]);
-
-%%
-for ii = 1:4
-    curC = ii;
-    X = x2fx(double(data(cLine == curC,1:(end-1))),'interactions');
-    Y = double(data(cLine == curC,end));
-
-    [B{ii}, bVar{ii}, pp{ii}, Ypred{ii}, pVarExp{ii}] = eNetJack(X,Y);
+    labb = {'Offset','Akt','Erk','GSK','cJun','JNK','P38','Akt-Erk','Akt-GSK',...
+        'Akt-cJun','Akt-JNK','Akt-P38','Erk-GSK','Erk-cJun','Erk-JNK','Erk-P38',...
+        'GSK-cJun','GSK-JNK','GSK-P38','cJun-JNK','cJun-P38','JNK-P38'};
+    names = {'SKBR3','BT474','PC9','HCC827'};
 end
 
-%%
-
-names = {'SKBR3','BT474','PC9','HCC827'};
-
-for ii = 1:4
-    X = x2fx(double(data(cLine == curC,1:(end-1))),'interactions');
+function plotIndivData() 
+    global names;
     
-    xx = X(8,:);
-    yy = B{ii};
+    load jacData;
     
-    subplot(2,2,ii)
-    title(names(ii));
-    plot(xx(pp{ii} < 0.05),yy(pp{ii} < 0.05),'o');
+    for ii = 1:length(names)
+        
+        for jj = 1:length(B{ii}) %#ok<USENS>
+            if B{ii}(jj) > 0
+                ccc = 'r';
+            else
+                ccc = 'k';
+            end
+            
+            if pp{ii}(jj) < 0.05
+                mmm = 'o';
+            else
+                mmm = '^';
+            end
+            
+            scatter(jj,ii, 100*abs(B{ii}(jj))^2 + 0.00001, [ccc mmm], 'filled');
+            hold on;
+        end
+    end
+
+    axis([0 length(B{ii})+1 0 length(names)+1]);
+    axis equal;
 end
 
 
-
-
-%%
-
-X = x2fx(double(data(cLine < 3,1:(end-1))),'interactions');
-Y = double(data(cLine < 3,end));
-
-[Btot, bVarTot, ppTot, Ypred, pVarExp] = eNetJack(X,Y);
-
-
-%%
-
-
-
-X = x2fx(double(data(cLine > 2,1:(end-1))),'interactions');
-Y = double(data(cLine > 2,end));
-
-[Btot, bVarTot, ppTot, Ypred, pVarExp] = eNetJack(X,Y);
-
-
-
-
-
-
-%%
-
-for ii = 1:2
-    subplot(2,1,ii);
+function genIndivData()
+    global cLine data;
     
-    IDX = pp{ii} < 0.05;
 
-    errorbar(B{ii}(IDX),bVar{ii}(IDX),'.');
-    text(1:sum(IDX),B{ii}(IDX),labb(IDX));
-    line([0 sum(IDX)+1],[0 0]);
-    axis([0 sum(IDX)+1 -1 0.5]);
-end
-%%
+    for ii = 1:4
+        curC = ii;
+        X = x2fx(double(data(cLine == curC,1:(end-1))),'interactions');
+        Y = double(data(cLine == curC,end));
 
-for ii = 1:4
-    subplot(2,2,ii);
+        [B{ii}, bVar{ii}, pp{ii}, Ypred{ii}, pVarExp{ii}] = eNetJack(X,Y);
+        
+    end
     
-    IDX = pp{ii} < 0.05;
-    
-    X = x2fx(double(data(cLine == ii,1:(end-1))),'interactions');
-    Y = double(data(cLine == ii,end));
-    
-    X = X(:,IDX);
-    XX = B{ii}(IDX);
-    
-    predOut = zscore(XX'*X');
-    
-    
-    bar([predOut; zscore(Y')]);
-    
+    save('jacData','B','bVar','pp','Ypred','pVarExp');
 end
 
-%%
-
-for ii = 1:4
-    subplot(2,2,ii);
+function allLines
+    % Model including all cell lines
+    clc;
     
-    IDX = pp{ii} < 0.05;
+    labb = {'Offset','Akt','Erk','GSK','cJun','JNK','P38','cLine','Akt-Erk','Akt-GSK',...
+        'Akt-cJun','Akt-JNK','Akt-P38','Akt-cLine','Erk-GSK','Erk-cJun','Erk-JNK','Erk-P38',...
+        'Erk-cLine','GSK-cJun','GSK-JNK','GSK-P38','GSK-cLine','cJun-JNK','cJun-P38',...
+        'cJun-cLine','JNK-P38','JNK-cLine','P38-cLine'};
+    
+    global data cLine;
+    
+    dataIn = [double(data(:,1:(end-1))) (cLine > 2)];
 
-    errorbar(B{ii}(IDX),bVar{ii}(IDX),'.');
-    text(1:sum(IDX),B{ii}(IDX),labb(IDX));
-    line([0 sum(IDX)+1],[0 0]);
-    axis([0 sum(IDX)+1 -1 0.5]);
+    X = x2fx(dataIn,'interactions');
+    Y = zscore(double(data(:,end)));
+    
+    [beta, sigma, E, covB, logL] = mvregress(X, Y);
+    
+    nlogL = mvregresslike(X,Y,beta,sigma,'mvn');
+    
+    mvL = @(xIn) -mvregresslike(X,Y,xIn,sigma,'mvn');
+    
+    rnd = slicesample(beta, 3000, 'logpdf', mvL);
+    
+    plot(rnd)
+    
+    
+    
+    %[B, bVar, pp, Ypred, pVarExp] = eNetJack(X,Y);
+    
+    %pVarExp
+    
+
+
+%      [Btot, bVarTot, ppTot, Ypred, pVarExp] = eNetJack(X,Y);
+% 
+% 
+%     IDX = ppTot < 0.05;
+%     errorbar(Btot(IDX),bVarTot(IDX),'.');
+%     text(1:sum(IDX),Btot(IDX),labb(IDX));
+%     line([0 sum(IDX)+1],[0 0]);
 end
 
 
-%%
-ii = 4;
-IDX = pp{ii} < 0.05;
-B{ii}(IDX)
-bVar{ii}(IDX)
-labb(IDX)'
+
+% %%
+% 
+% 
+% 
+% for ii = 1:4
+%     X = x2fx(double(data(cLine == curC,1:(end-1))),'interactions');
+%     
+%     xx = X(8,:);
+%     yy = B{ii};
+%     
+%     subplot(2,2,ii)
+%     title(names(ii));
+%     plot(xx(pp{ii} < 0.05),yy(pp{ii} < 0.05),'o');
+% end
+% 
+% 
+% 
+% 
+% %%
+% 
+% X = x2fx(double(data(cLine < 3,1:(end-1))),'interactions');
+% Y = double(data(cLine < 3,end));
+% 
+% [Btot, bVarTot, ppTot, Ypred, pVarExp] = eNetJack(X,Y);
+% 
+% 
+% %%
+% 
+% function allLines
+% 
+%     X = x2fx(double(data(cLine > 2,1:(end-1))),'interactions');
+%     Y = double(data(cLine > 2,end));
+% 
+%     [Btot, bVarTot, ppTot, Ypred, pVarExp] = eNetJack(X,Y);
+%     
+% end
+
+
+
+% 
+% 
+% 
+% %%
+% 
+% for ii = 1:2
+%     subplot(2,1,ii);
+%     
+%     IDX = pp{ii} < 0.05;
+% 
+%     errorbar(B{ii}(IDX),bVar{ii}(IDX),'.');
+%     text(1:sum(IDX),B{ii}(IDX),labb(IDX));
+%     line([0 sum(IDX)+1],[0 0]);
+%     axis([0 sum(IDX)+1 -1 0.5]);
+% end
+% %%
+% 
+% for ii = 1:4
+%     subplot(2,2,ii);
+%     
+%     IDX = pp{ii} < 0.05;
+%     
+%     X = x2fx(double(data(cLine == ii,1:(end-1))),'interactions');
+%     Y = double(data(cLine == ii,end));
+%     
+%     X = X(:,IDX);
+%     XX = B{ii}(IDX);
+%     
+%     predOut = zscore(XX'*X');
+%     
+%     
+%     bar([predOut; zscore(Y')]);
+%     
+% end
+% 
+% %%
+% 
+% for ii = 1:4
+%     subplot(2,2,ii);
+%     
+%     IDX = pp{ii} < 0.05;
+% 
+%     errorbar(B{ii}(IDX),bVar{ii}(IDX),'.');
+%     text(1:sum(IDX),B{ii}(IDX),labb(IDX));
+%     line([0 sum(IDX)+1],[0 0]);
+%     axis([0 sum(IDX)+1 -1 0.5]);
+% end
+% 
+% 
+% %%
+% ii = 4;
+% IDX = pp{ii} < 0.05;
+% B{ii}(IDX)
+% bVar{ii}(IDX)
+% labb(IDX)'

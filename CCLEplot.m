@@ -1,10 +1,7 @@
-%
 clc; clear;
 import bioma.data.*;
 
-load DMobj;
-
-RTKnames = {'MET', 'FGFR1', 'IGF1R', 'PDGFRB', 'PDGFRA', 'ERBB3', 'EGFR'};
+DMobj = DataMatrix('File','CCLE.dat');
 
 CellLines = {'EFM19_BREAST','SKBR3_BREAST', 'BT474_BREAST', 'AU565_BREAST', 'HCC1954_BREAST', ...
     'CHL1_SKIN','FADU_UPPER_AERODIGESTIVE_TRACT','PC14_LUNG',...

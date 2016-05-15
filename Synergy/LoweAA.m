@@ -14,34 +14,38 @@ function LoweAAfile(name)
     [DD, viab] = loadData (name);
 
     % Do the actual fitting
-    maxP = [ 2,  2,  0, 10, 10];
-    minP = [ 0,  0,  0,-10,-10];
+    maxP{1} = [ 2,  2,  100, 10, 10];
+    minP{1} = [ 0,  0, -100,-10,-10];
+    
+    maxP{2} = maxP{1};
+    maxP{2}(3) = 0;
+    minP{2} = minP{1};
+    minP{2}(3) = 0;
     
     optFun = @(x) runGreco(x,DD,viab);
-    plotFun = @(x, flag) runGreco(x.x,DD,viab,1);
+    %plotFun = @(x, flag) runGreco(x.x,DD,viab,1);
     
-    statP = psoptimset('Display','iter', 'CompletePoll','on','CompleteSearch','on',...
-        'PlotFcns',plotFun,'UseParallel',true);
+    statP = psoptimset('Display','final', 'CompletePoll','on','CompleteSearch','on',...
+        'UseParallel',true); % 'PlotFcns',plotFun
     
-    statG = gaoptimset('Display','iter','UseParallel',true,...
-        'PlotFcns',@(~, state, ~) plotBestInd(DD, viab, state),...
-        'PopulationSize',200); %#ok<NASGU>
+    for ii = 1:2
+        [x{ii}, f{ii}] = patternsearch(optFun, ...
+            minP{ii} + (maxP{ii} - minP{ii}).*rand(size(minP{ii})),...
+            [], [], [], [], minP{ii}, maxP{ii}, [], statP);
+    end
     
-    [x, f] = patternsearch(optFun, ...
-        minP + (maxP - minP).*rand(size(minP)), [], [], [], [], minP, maxP, [], statP);
-    %[x, f] = ga(optFun, length(minP), [], [], [], [], minP, maxP, [], statG);
-    dlmwrite(['Nullout' name(1:(end-8)) '.csv'],[f x],'-append');
+    [~, resid1] = optFun(x{1});
+    resid1 = resid1 - viab;
+    
+    [~, resid2] = optFun(x{2});
+    resid2 = resid2 - viab;
+    
+    [~, pval] = vartest2(resid1,resid2);
+    
+    dlmwrite(['Nullout' name(1:(end-8)) '.csv'],[f{1} x{1} f{2} x{2} pval],'-append');
 end
 
-function fval = plotBestInd(DD, viab, state)
-    [~, IDX] = min(state.Score);
-    
-    runGreco(state.Population(IDX,:),DD,viab,1);
-    
-    fval = state;
-end
-
-function fval = runGreco(xP,DD,viab, plott)
+function [fval, dataFit] = runGreco(xP,DD,viab, plott)
     if nargin < 4
         plott = 0;
     end
@@ -71,34 +75,15 @@ function fval = runGreco(xP,DD,viab, plott)
         [0.5 0], [1.1 min(viab)*2],...
         [], optimset('Display','off'));
     
+    dataFit = x(1)*fits' + x(2);
+    
     if plott == 1
         hold off;
         plot(viab,'r.');
         hold on;
-        plot(x(1)*fits' + x(2),'b');
+        plot(dataFit,'b');
         drawnow;
         
         fval = 0;
     end
-end
-
-function [DD, viab] = loadData (fileName)
-    data = csvread(fileName);
-
-    xAx = data(1,2:end);
-    yAx = data(2:end,1);
-    data(1,:) = []; data(:,1) = [];
-
-    idx = 1;
-    for ii = 1:length(xAx)
-        for jj = 1:length(yAx)
-            DD(idx,1) = xAx(ii); %#ok<AGROW>
-            DD(idx,2) = yAx(jj); %#ok<AGROW>
-            viab(idx) = data(jj,ii); %#ok<AGROW>
-            idx = idx + 1;
-        end
-    end
-
-    DD = DD + 0.001;
-    viab = viab / max(viab);
 end
